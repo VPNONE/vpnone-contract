@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/VPNONE/vpnone-contract#readme",
   "dependencies": {
+    "eth-lightwallet": "^3.0.1",
     "zeppelin-solidity": "^1.5.0"
   }
 }
