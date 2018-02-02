@@ -2,12 +2,12 @@ pragma solidity ^0.4.17;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/token/ERC20.sol";
-import "../library/ServiceControlAbstract.sol";
+import "../library/Common.sol";
 
 /**
  * 服务提供者合约
  */
-contract ServiceProvider is Ownable {
+contract ServiceProvider is Ownable, Common {
 
     /************** 定义变量 **************/
     // 提现地址
@@ -24,7 +24,6 @@ contract ServiceProvider is Ownable {
     event SetWithdrawAddr(address indexed sender, address indexed oldWithdrawAddr, address indexed newWithdrawAddr);
    
     /************** 定义修饰符 **************/
-
 
     /************** 定义方法 **************/
 
@@ -48,10 +47,11 @@ contract ServiceProvider is Ownable {
      * 提现
      */
     function withdraw(uint _amount) public onlyOwner {
-        ERC20 token = ERC20(VOTTokenAddr);
+        address votTokenAddr = getVOTTokenContractAddr();
+        ERC20 token = ERC20(votTokenAddr);
         var balance = token.balanceOf(this);
         require(balance < _amount);
-        Withdraw(msg.sender, withdrawAddr, amount);
+        Withdraw(msg.sender, withdrawAddr, _amount);
         token.transfer(owner, _amount);
     }
 }
