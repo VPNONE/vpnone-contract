@@ -21,7 +21,7 @@ contract ServiceControlAbstract {
     /**
      * 绑定用户与充值合约地址
      */
-    function bindContract(address _userAddr, address _contractAddr) public returns(bool);
+    function bindContract(address _userAddr, address _contractAddr) public;
 
     /**
      * 获取用户的绑定的充值合约地址

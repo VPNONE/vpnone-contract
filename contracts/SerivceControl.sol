@@ -9,10 +9,10 @@ contract ServiceControl is Ownable {
     /************** 定义变量 **************/
 
     // 记录单个合约绑定关系
-    mapping (address => address) contractBinds;
+    mapping (address => address) public contractBinds;
 
     // VOT代币合约地址
-    address votTokenContractAddr = 0x0;
+    address public votTokenContractAddr = 0x0;
     
     /************** 定义事件 **************/
 
@@ -43,10 +43,9 @@ contract ServiceControl is Ownable {
     /**
      * 绑定用户与充值合约地址
      */
-    function bindContract(address _userAddr, address _contractAddr) public isBindContract(_userAddr) onlyOwner returns(bool) {
+    function bindContract(address _userAddr, address _contractAddr) public isBindContract(_userAddr) {
         BindContract(msg.sender, _userAddr, _contractAddr);
         contractBinds[_userAddr] = _contractAddr;
-        return true;
     }
 
     /**

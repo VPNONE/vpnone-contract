@@ -1,17 +1,22 @@
 pragma solidity ^0.4.17;
-
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/token/ERC20.sol";
-import "../library/Common.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./ServiceCommon.sol";
 
 /**
  * 服务提供者合约
  */
-contract ServiceProvider is Ownable, Common {
+contract ServiceProvider is Ownable {
 
     /************** 定义变量 **************/
     // 提现地址
     address withdrawAddr = 0x0;
+
+    // common合约地址
+	address commonContractAddr = 0x0;
+
+	// common合约
+	ServiceCommon commonContract;
 
     // 中控合约地址
 
@@ -31,8 +36,10 @@ contract ServiceProvider is Ownable, Common {
         Receivables(this, msg.sender, msg.value);
     }
 
-    function ServiceProvider() public {
+    function ServiceProvider(address _commonContractAddr) public {
         withdrawAddr = msg.sender;
+        commonContractAddr = _commonContractAddr;
+		commonContract = ServiceCommon(commonContractAddr);
     }
 
     /**
@@ -47,7 +54,7 @@ contract ServiceProvider is Ownable, Common {
      * 提现
      */
     function withdraw(uint _amount) public onlyOwner {
-        address votTokenAddr = getVOTTokenContractAddr();
+        address votTokenAddr = commonContract.getVOTTokenContractAddr();
         ERC20 token = ERC20(votTokenAddr);
         var balance = token.balanceOf(this);
         require(balance < _amount);

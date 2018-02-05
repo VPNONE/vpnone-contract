@@ -1,15 +1,20 @@
 pragma solidity ^0.4.17;
-
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/token/ERC20.sol";
-import "../library/Common.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./ServiceCommon.sol";
 
 /**
- * 服务使用者合约 
+ * 服务使用者合约
  */
-contract ServiceUser is Ownable, Common {
+contract ServiceUser is Ownable {
 
 	/************** 定义变量 **************/
+
+	// common合约地址
+	address commonContractAddr = 0x0;
+
+	// common合约
+	ServiceCommon commonContract;
 
 	// 该合约提现地址
 	address withdrawAddr = 0x0;
@@ -32,11 +37,13 @@ contract ServiceUser is Ownable, Common {
 	/**
 	 * 构造函数
 	 */
-	function ServiceUser() public {
+	function ServiceUser(address _commonContractAddr) public {
 		withdrawAddr = msg.sender;
-		// address controlContract = getControlContract();
-		// 绑定合约 TODO：error
-		// controlContract.bindContract(msg.sender, this);
+		commonContractAddr = _commonContractAddr;
+		commonContract = ServiceCommon(commonContractAddr);
+		ServiceControlAbstract controlContract = commonContract.getControlContract();
+		// 绑定合约
+		controlContract.bindContract(msg.sender, this);
 	}
 
 	/**
@@ -45,7 +52,7 @@ contract ServiceUser is Ownable, Common {
 	function withdraw(uint _amount) public onlyOwner {
 
 		// 获取账户余额
-		address votTokenAddr = getVOTTokenContractAddr();
+		address votTokenAddr = commonContract.getVOTTokenContractAddr();
 		ERC20 votTokenContract = ERC20(votTokenAddr);
 		var balance = votTokenContract.balanceOf(this);
 		require(_amount <= balance);
@@ -58,8 +65,10 @@ contract ServiceUser is Ownable, Common {
 	 * 防止用户误充值入其他token
 	 * TODO: 待定实现方式
 	 */
-	function withdrawOtherToken(address _tokenAddr, address _to, uint _amount) public isControlOwner {
-
+	function withdrawOtherToken(address _tokenAddr, address _to, uint _amount) public {
+		
+		// 仅control可以使用
+		require(commonContract.getIsControlOwner());
 		ERC20 token = ERC20(_tokenAddr);
 		var balance = token.balanceOf(this);
 		require(balance >= _amount);
@@ -74,7 +83,7 @@ contract ServiceUser is Ownable, Common {
 	function buyService(address _serviceAddr, uint _amount) public payable {
 		
 		BuyService(msg.sender, _serviceAddr, _amount);
-		address votTokenAddr = getVOTTokenContractAddr();
+		address votTokenAddr = commonContract.getVOTTokenContractAddr();
 		ERC20 token = ERC20(votTokenAddr);
 		require(token.transfer(_serviceAddr, _amount));
 	}
